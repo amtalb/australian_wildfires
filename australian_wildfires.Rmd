@@ -1,0 +1,40 @@
+---
+title: "Australian Wildfire Visualization"
+output: html_document
+author: "Alexander Talbott"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, include = FALSE)
+library(tidyverse)
+library(sf)
+library(tmap)
+library(ozmaps)
+library(gganimate)
+```
+
+```{r}
+au_wildfire <- read_csv('fire_nrt_V1_96617.csv')
+au_wildfire <- au_wildfire %>%
+  select(latitude, longitude, bright_ti4, acq_date) %>%
+  mutate(bright_ti4 = bright_ti4 - 273.15)
+
+oz_states <- ozmaps::ozmap_states
+```
+
+```{r include=TRUE}
+ggplot(oz_states) + 
+  geom_sf() +
+  geom_point(data = au_wildfire, aes(x = longitude, y = latitude, color=bright_ti4)) + 
+  coord_sf() + 
+  transition_time(acq_date) +
+  labs(title = "Date: {frame_time}",
+       x = "",
+       y = "") +
+  scale_color_gradient(low = 'yellow', high = 'red4') +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        legend.position = "none") 
+```
